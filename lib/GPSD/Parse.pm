@@ -9,13 +9,16 @@ use JSON;
 our $VERSION = '0.01';
 
 sub new {
-    return bless {}, shift;
+    my ($class, %args) = @_;
+    my $self = bless {%args}, $class;
+    $self->_socket;
+    return $self;
 }
 sub on {
-    #FIXME: configure ?WATCH={"enable": true}
+    shift->_socket()->send('?WATCH={"enable": true}');
 }
 sub off {
-    #FIXME: configure ?WATCH={"enable": false}
+    shift->_socket()->send('?WATCH={"enable": false}');
 }
 sub poll {
     my ($self, %args) = @_;
@@ -37,7 +40,7 @@ sub poll {
         }
     }
     else {
-        # socket read from UART here...
+        #FIXME: socket read from UART here... (getline())
     }
 
     #FIXME: check what is returned to ensure the following
@@ -83,6 +86,18 @@ sub satellites {
     }
     return $self->{satellites};
 }
+sub _host {
+    my ($self, $host) = @_;
+    $self->{host} = $host if defined $host;
+    $self->{host} = '127.0.0.1' if ! defined $self->{host};
+    return $self->{host};
+}
+sub _port {
+    my ($self, $port) = @_;
+    $self->{port} = $host if defined $port;
+    $self->{port} = 2947 if ! defined $self->{port};
+    return $self->{port};
+}
 sub _parse {
     my ($self, $data) = @_;
 
@@ -102,6 +117,22 @@ sub _parse {
         $sats{$prn} = $sat;
     }
     $self->{satellites} = \%sats;
+}
+sub _socket {
+    my ($self) = @_;
+
+    if (! defined $self->{socket} && ! defined $self->{socket}->connected){
+        $self->{"socket"}=IO::Socket::INET6->new(
+                        PeerAddr => $self->_host,
+                        PeerPort => $self->_port,
+        );
+    }
+
+    my ($h, $p) = $self->_host, $self->_port;
+
+    croak "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
+  
+    return $self->{'socket'};
 }
 sub _vim {} # fold placeholder
 
@@ -158,7 +189,7 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 =head1 DESCRIPTION
 
 Simple, lightweight distribution that polls C<gpsd> for data received from a
-UART (serial) connected GPS receiver.
+UART (serial) connected GPS receiver over a TCP connection.
 
 The data is fetched in JSON, and returned as Perl data.
 
@@ -167,9 +198,21 @@ JSON format is required to have been previously installed.
 
 =head1 METHODS
 
-=head2 new
+=head2 new(%args)
 
 Instantiates and returns a new L<GPSD::Parse> object instance.
+
+Parameters:
+
+    host => 127.0.0.1
+
+Optional, String: An IP address or fully qualified domain name of the C<gpsd>
+server. Defaults to the localhost (C<127.0.0.1>) if not supplied.
+
+    port => 2947
+
+Optional, Integer: The TCP port number that the C<gpsd> daemon is running on.
+Defaults to C<2947> if not sent in.
 
 =head2 on
 
