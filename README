@@ -1,0 +1,149 @@
+NAME
+
+    GPSD::Parse - Parse, extract and manipulate JSON output from gpsd
+
+SYNOPSIS
+
+        use GPSD::Parse;
+    
+        my $gps = GPSD::Parse->new;
+    
+        # start the data flow, and poll for data
+    
+        $gps->on;
+        $gps->poll;
+    
+        # get all TPV data in an href
+    
+        my $tpv_href = $gps->tpv;
+    
+        # get individual TPV stats
+    
+        print $gps->tpv('lat');
+        print $gps->tpv('lon');
+    
+        # get all sattelites in an href of hrefs
+    
+        my $sats = $gps->satellites;
+    
+        # get an individual piece of info from a single sattelite
+    
+        print $gps->satellites(16, 'used');
+    
+        # timestamp of the most recent poll
+    
+        print $gps->time;
+    
+        # stop capturing data
+    
+        $gps->off;
+
+METHODS
+
+ new
+
+    Instantiates and returns a new GPSD::Parse object instance.
+
+ on
+
+    Puts gpsd in listening mode, ready to poll data from.
+
+ off
+
+    Turns off gpsd listening mode.
+
+ poll(%args)
+
+    Does a poll of gpsd for data, and configures the object with that data.
+
+    Parameters:
+
+    All parameters are sent in as a hash.
+
+        fname => $filename
+
+    Optional, String: Used for testing, you can send in the name of a JSON
+    file that contains gpsd JSON data and we'll work with that instead of
+    polling the GPS device directly.
+
+        return => 'json'
+
+    Optional, String: By default, after configuring the object, we will
+    return the polled raw data as a Perl hash reference. Send this param in
+    with the value of 'json' and we'll return the data exactly as we
+    received it from gpsd.
+
+    Returns:
+
+    The raw poll data as either a Perl hash reference structure or as the
+    original JSON string.
+
+ tpv($stat)
+
+    TPV stands for "Time Position Velocity". This is the data that
+    represents your location and other vital statistics.
+
+    By default, we return a hash reference that is in the format stat =
+    'value'>. #FIXME: add in available stats!
+
+    Parameters:
+
+        $stat
+
+    Optional, String. You can extract individual statistics of the TPV data
+    by sending in the name of the stat you wish to fetch. This will then
+    return the string value if available. Returns undef if the statistic
+    doesn't exist.
+
+ satellites($num, $stat)
+
+    #FIXME: add sat stat info!
+
+    This method returns a hash reference of hash references, where the key
+    is the satellite number, and the value is a hashref that contains the
+    various information related to the specific numbered satellite.
+
+    Note that the data returned by this function has been manipuated and is
+    not exactly equivalent of that returned by gpsd. To get the raw data,
+    see sky().
+
+    Parameters:
+
+        $num
+
+    Optional, Integer: Send in the satellite number and we'll return the
+    relevant information in a hash reference for the specific satellite
+    requested, as opposed to returning data for all the satellites. Returns
+    undef if a satellite by that number doesn't exist.
+
+        $stat
+
+    Optional, String: Like tpv(), you can request an individual piece of
+    information for a satellite. This parameter is only valid if you've
+    sent in the $num param, and the specified satellite exists.
+
+ sky
+
+    Returns a hash reference containing all of the data that was pulled
+    from the SKY information returned by gpsd. This information contains
+    satellite info and other related statistics.
+
+ device
+
+    Returns a string containing the actual device the GPS is connected to
+    (eg: /dev/ttyS0).
+
+AUTHOR
+
+    Steve Bertrand, <steveb at cpan.org>
+
+LICENSE AND COPYRIGHT
+
+    Copyright 2017 Steve Bertrand.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of either: the GNU General Public License as published
+    by the Free Software Foundation; or the Artistic License.
+
+    See http://dev.perl.org/licenses/ for more information.
+

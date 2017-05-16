@@ -1,0 +1,117 @@
+package GPSD::Parse;
+
+use strict;
+use warnings;
+
+use Carp qw(croak);
+use JSON;
+
+our $VERSION = '0.01';
+
+sub new {
+    return bless {}, shift;
+}
+sub poll {
+    my ($self, %args) = @_;
+  
+    # fname => json file (testing)
+    # return => json
+
+    my $gps_json_data;
+
+    if ($args{fname}){
+        my $fname = $args{fname};
+
+        open my $fh, '<', $fname or croak "can't open file '$fname': $!";
+
+        {
+            local $/;
+            $gps_json_data = <$fh>;
+            close $fh or croak "can't close file '$fname': $!";
+        }
+    }
+    else {
+        # socket read from UART here...
+    }
+
+    #FIXME: check what is returned to ensure the following
+    # line is correct in its assumption
+
+    return undef if ! $gps_json_data;
+
+    my $gps_perl_data = decode_json $gps_json_data;
+
+    $self->_parse($gps_perl_data);
+
+    return $gps_json_data if defined $args{return} && $args{return} eq 'json';
+    return $gps_perl_data;
+}
+sub _parse {
+    my ($self, $data) = @_;
+
+    $self->{tpv}  = $data->{tpv}[0];
+
+    $self->{time} = $self->{tpv}{time};
+    $self->{device} = $self->{tpv}{device};
+
+    $self->{sky} = $data->{sky}[0];
+
+    my %sats;
+
+    for my $sat (@{ $self->{sky}{satellites} }){
+        my $prn = $sat->{PRN};
+        delete $sat->{PRN};
+        $sats{$prn} = $sat;
+    }
+    $self->{satellites} = \%sats;
+}
+sub tpv {
+    return shift->{tpv};
+}
+sub sky {
+    return shift->{sky};
+}
+sub time {
+    return shift->{time};
+}
+sub device {
+    return shift->{device};
+}
+sub satellites {
+    my ($self, $sat_num) = @_;
+
+    if (defined $sat_num){
+        return $self->{satellite}{$sat_num};
+    }
+    return $self->{satellites};
+}
+
+
+1;
+
+=head1 NAME
+
+GPSD::Parse - Parse, extract and manipulate JSON output from gpsd
+
+=head1 SYNOPSIS
+
+    use GPSD::Parse;
+
+    my $foo = GPSD::Parse->new();
+    ...
+
+=head1 METHODS
+
+=head1 AUTHOR
+
+Steve Bertrand, C<< <steveb at cpan.org> >>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2017 Steve Bertrand.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See L<http://dev.perl.org/licenses/> for more information.
