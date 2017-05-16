@@ -262,6 +262,15 @@ Returns a string containing the actual device the GPS is connected to
 
 Returns a string of the date and time of the most recent poll, in UTC.
 
+=head1 SEE ALSO
+
+A very similar distribution is L<Net::GPSD3>. However, it has a long line of
+prerequisite distributions that didn't always install easily on my primary
+target platform, the Raspberry Pi.
+
+This distribution isn't meant to replace that one, it's just a much simpler and
+more lightweight piece of software that pretty much does the same thing.
+
 =head1 AUTHOR
 
 Steve Bertrand, C<< <steveb at cpan.org> >>
