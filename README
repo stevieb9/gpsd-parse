@@ -22,7 +22,7 @@ SYNOPSIS
         print $gps->tpv('lat');
         print $gps->tpv('lon');
     
-        # get all sattelites in an href of hrefs
+        # get all satellites in an href of hrefs
     
         my $sats = $gps->satellites;
     
@@ -132,6 +132,10 @@ METHODS
 
     Returns a string containing the actual device the GPS is connected to
     (eg: /dev/ttyS0).
+
+ time
+
+    Returns a string of the date and time of the most recent poll, in UTC.
 
 AUTHOR
 

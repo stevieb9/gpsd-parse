@@ -131,7 +131,7 @@ GPSD::Parse - Parse, extract and manipulate JSON output from gpsd
     print $gps->tpv('lat');
     print $gps->tpv('lon');
 
-    # get all sattelites in an href of hrefs
+    # get all satellites in an href of hrefs
 
     my $sats = $gps->satellites;
 
@@ -239,6 +239,10 @@ info and other related statistics.
 
 Returns a string containing the actual device the GPS is connected to
 (eg: C</dev/ttyS0>).
+
+=head2 time
+
+Returns a string of the date and time of the most recent poll, in UTC.
 
 =head1 AUTHOR
 
