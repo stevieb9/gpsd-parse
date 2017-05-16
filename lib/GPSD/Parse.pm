@@ -109,7 +109,11 @@ sub _vim {} # fold placeholder
 
 =head1 NAME
 
-GPSD::Parse - Parse, extract and manipulate JSON output from gpsd
+GPSD::Parse - Parse, extract use the JSON output from GPS units
+
+=for html
+<a href="http://travis-ci.org/stevieb9/gpsd-parse"><img src="https://secure.travis-ci.org/stevieb9/gpsd-parse.png"/>
+<a href='https://coveralls.io/github/stevieb9/gpsd-parse?branch=master'><img src='https://coveralls.io/repos/stevieb9/gpsd-parse/badge.svg?branch=master&service=github' alt='Coverage Status' /></a>
 
 =head1 SYNOPSIS
 
@@ -131,21 +135,35 @@ GPSD::Parse - Parse, extract and manipulate JSON output from gpsd
     print $gps->tpv('lat');
     print $gps->tpv('lon');
 
+    # timestamp of the most recent poll
+
+    print $gps->time;
+
     # get all satellites in an href of hrefs
 
     my $sats = $gps->satellites;
 
     # get an individual piece of info from a single sattelite
 
-    print $gps->satellites(16, 'used');
+    print $gps->satellites(16, 'ss');
 
-    # timestamp of the most recent poll
+    # check which serial device the GPS is connected to
 
-    print $gps->time;
+    print $gps->device;
 
     # stop capturing data
 
     $gps->off;
+
+=head1 DESCRIPTION
+
+Simple, lightweight distribution that polls C<gpsd> for data received from a
+UART (serial) connected GPS receiver.
+
+The data is fetched in JSON, and returned as Perl data.
+
+A version of L<gpsd|http://catb.org/gpsd/gpsd.html> that returns results in
+JSON format is required to have been previously installed.
 
 =head1 METHODS
 
