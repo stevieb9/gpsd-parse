@@ -521,11 +521,11 @@ representing the degree from true north. A common example would be:
 Degree/direction map:
 
     N       348.75 - 11.25
-    NNE     11.25 - 33.75
-    NE      33.75 - 56.25
-    ENE     56.25 - 78.75
+    NNE     11.25  - 33.75
+    NE      33.75  - 56.25
+    ENE     56.25  - 78.75
 
-    E       78.75 - 101.25
+    E       78.75  - 101.25
     ESE     101.25 - 123.75
     SE      123.75 - 146.25
     SSE     146.25 - 168.75
@@ -579,9 +579,7 @@ Here's a simple example using some of the basic features and options.
 
     use GPSD::Parse;
 
-    my $fname = 't/data/gps.json';
-
-    my $gps = GPSD::Parse->new(file => $fname, signed => 0);
+    my $gps = GPSD::Parse->new(signed => 0);
 
     $gps->poll;
 
