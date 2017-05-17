@@ -30,6 +30,7 @@ sub new {
 
     $self->_file($args{file});
     $self->_metric($args{metric});
+    $self->_signed($args{signed});
 
     if (! $self->_file) {
         $self->_port($args{port});
@@ -144,6 +145,7 @@ sub _port {
     return $self->{port};
 }
 sub _parse {
+    # parse the GPS data and populate the object
     my ($self, $data) = @_;
 
     $self->{tpv}  = $data->{tpv}[0];
@@ -162,6 +164,13 @@ sub _parse {
         }
     }
 
+    if (! $self->_signed){
+        # switch between signed lat/long
+
+        ($self->{tpv}{lat}, $self->{tpv}{lon})
+            = $self->_signed_convert($self->{tpv}{lat}, $self->{tpv}{lon});
+    }
+
     my %sats;
 
     for my $sat (@{ $self->{sky}{satellites} }){
@@ -172,7 +181,39 @@ sub _parse {
     }
     $self->{satellites} = \%sats;
 }
+sub _signed {
+    # convert between signed location and alpha
+    my ($self, $signed) = @_;
+    $self->{signed} = $signed if defined $signed;
+    $self->{signed} = 1 if ! defined $self->{signed};
+    return $self->{signed};
+}
+sub _signed_convert {
+    # perform the actual lat/long conversion
+    # we do it here for testing purposes
+
+    shift if @_ == 3;
+
+    my ($lat, $lon) = @_;
+
+    if ($lat =~ /^-/) {
+        $lat =~ s/-(.*)/${1}S/;
+    }
+    else {
+        $lat .= 'N';
+    }
+
+    if ($lon =~ /^-/) {
+        $lon =~ s/-(.*)/${1}W/;
+    }
+    else {
+        $lon .= 'E';
+    }
+
+    return ($lat, $lon);
+}
 sub _is_socket {
+    # check if we're in socket mode
     my ($self, $status) = @_;
     $self->{is_socket} = $status if defined $status;
     return $self->{is_socket};
@@ -271,11 +312,14 @@ documentation within the L</METHODS> section. Specifically, look at the
 C<tpv()>, C<sattelites()> and the more broad C<sky()> method sections to
 understand what available data attributes you can extract.
 
-=head2 Measurement Conversion
+=head2 Conversions
 
 All output where applicable defaults to metric (metres). See the C<metric>
 parameter in the C<new()> method to change this to use imperial/standard
 measurements.
+
+For latitude and longitude, we default to using the signed notation. You can
+disable this with the C<signed> parameter in C<new()>.
 
 =head1 METHODS
 
@@ -302,6 +346,17 @@ in a false value (C<0>) to use imperial/standard measurement conversions
 (ie. feet). Note that if returning the raw *JSON* data from the C<poll()>
 method, the conversions will not be done. The default raw Perl return will have
 been converted however.
+
+    signed => Bool
+
+Optional, Integer: By default, we use the signed notation for latitude and
+longitude. Send in a false value (C<0>) to disable this. Here's an example:
+
+    enabled (default)   disabled
+    lat: 51.12345678    51.12345678N
+    lon: -114.123456    114.123456W
+
+We add the letter notation at the end of the result if C<signed> is disabled.
 
     file => 'filename.ext'
 

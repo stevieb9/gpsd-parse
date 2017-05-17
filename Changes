@@ -7,6 +7,8 @@ Revision history for GPSD-Parse
           likewise called in the destructor
         - new() now has a 'metric' option to convert to using imperial/standard
           measurements where applicable (closes #1)
+        - added 'signed' option in new() to convert from signed lat/lon to alpha
+          (eg: from -1.23 to 1.23S) (closes #3)
 
 0.01    2017-05-16
         - first version, released on an unsuspecting world.

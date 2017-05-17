@@ -64,11 +64,14 @@ NOTES
     tpv(), sattelites() and the more broad sky() method sections to
     understand what available data attributes you can extract.
 
- Measurement Conversion
+ Conversions
 
     All output where applicable defaults to metric (metres). See the metric
     parameter in the new() method to change this to use imperial/standard
     measurements.
+
+    For latitude and longitude, we default to using the signed notation.
+    You can disable this with the signed parameter in new().
 
 METHODS
 
@@ -95,6 +98,19 @@ METHODS
     measurement conversions (ie. feet). Note that if returning the raw
     *JSON* data from the poll() method, the conversions will not be done.
     The default raw Perl return will have been converted however.
+
+        signed => Bool
+
+    Optional, Integer: By default, we use the signed notation for latitude
+    and longitude. Send in a false value (0) to disable this. Here's an
+    example:
+
+        enabled (default)   disabled
+        lat: 51.12345678    51.12345678N
+        lon: -114.123456    114.123456W
+
+    We add the letter notation at the end of the result if signed is
+    disabled.
 
         file => 'filename.ext'
 
