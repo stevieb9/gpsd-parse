@@ -6,15 +6,18 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
+my $fname = 't/data/gps.json';
+
 my $gps;
 
-eval {
+my $sock = eval {
     $gps = $mod->new;
+    1;
 };
 
-plan skip_all => "no socket available" if $@;
+$gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on;
+$gps->on if $sock;
 
 my @stats = qw(
     ss el az used
@@ -59,6 +62,6 @@ $gps->poll;
     is $gps->satellites(9999), undef, "satellites() returns undef with unknown sat param";
 }
 
-$gps->off;
+$gps->off if $sock;
 
 done_testing;

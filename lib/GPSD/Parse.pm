@@ -27,9 +27,15 @@ BEGIN {
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
-    $self->_port($args{port});
-    $self->_host($args{host});
-    $self->_socket;
+
+    $self->_file($args{file});
+
+    if (! $self->_file) {
+        $self->_port($args{port});
+        $self->_host($args{host});
+        $self->_socket;
+    }
+
     return $self;
 }
 sub on {
@@ -43,8 +49,8 @@ sub poll {
   
     my $gps_json_data;
 
-    if ($args{fname}){
-        my $fname = $args{fname};
+    if ($self->_file){
+        my $fname = $self->_file($args{file});
 
         open my $fh, '<', $fname or croak "can't open file '$fname': $!";
 
@@ -112,6 +118,11 @@ sub satellites {
     }
     return $self->{satellites};
 }
+sub _file {
+    my ($self, $file) = @_;
+    $self->{file} = $file if defined $file;
+    return $self->{file};
+}
 sub _host {
     my ($self, $host) = @_;
     $self->{host} = $host if defined $host;
@@ -156,7 +167,7 @@ sub _socket {
 
     my ($h, $p) = ($self->_host, $self->_port);
 
-    die "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
+    croak "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
   
     return $self->{'socket'};
 }
@@ -255,6 +266,12 @@ server. Defaults to the localhost (C<127.0.0.1>) if not supplied.
 Optional, Integer: The TCP port number that the C<gpsd> daemon is running on.
 Defaults to C<2947> if not sent in.
 
+    file => 'filename.ext'
+
+Optional, String: For testing purposes. Instead of reading from a socket, send
+in a filename that contains legitimate JSON data saved from a previous C<gpsd>
+output and we'll operate on that. Useful also for re-running previous output.
+
 =head2 on
 
 Puts C<gpsd> in listening mode, ready to poll data from. 
@@ -277,11 +294,13 @@ Parameters:
 
 All parameters are sent in as a hash.
 
-    fname => $filename
+    file => $filename
 
 Optional, String: Used for testing, you can send in the name of a JSON file
 that contains C<gpsd> JSON data and we'll work with that instead of polling
-the GPS device directly.
+the GPS device directly. Note that you *must* instantiate the object with the
+C<file> parameter in new for this to have any effect and to bypass the socket
+creation.
 
     return => 'json'
 

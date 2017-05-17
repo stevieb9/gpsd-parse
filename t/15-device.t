@@ -6,15 +6,18 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
+my $fname = 't/data/gps.json';
+
 my $gps;
 
-eval {
+my $sock = eval {
     $gps = $mod->new;
+    1;
 };
 
-plan skip_all => "no socket available" if $@;
+$gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on;
+$gps->on if $sock;
 
 { # default return
 
@@ -26,6 +29,6 @@ $gps->on;
     like $t, qr|^/dev/ttyS0$|, "...and is ok"; 
 }
 
-$gps->off;
+$gps->off if $sock;
 
 done_testing;

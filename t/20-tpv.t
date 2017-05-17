@@ -6,15 +6,18 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
+my $fname = 't/data/gps.json';
+
 my $gps;
 
-eval {
+my $sock = eval {
     $gps = $mod->new;
+    1;
 };
 
-plan skip_all => "no socket available" if $@;
+$gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on;
+$gps->on if $sock;
 
 my @stats = qw(
    time
@@ -64,6 +67,6 @@ $gps->poll;
     is $gps->tpv('invalid'), undef, "unknown stat param returns undef";
 }
 
-$gps->off;
+$gps->off if $sock;
 
 done_testing;

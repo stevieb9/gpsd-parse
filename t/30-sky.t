@@ -6,16 +6,18 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
+my $fname = 't/data/gps.json';
+
 my $gps;
 
-eval {
+my $sock = eval {
     $gps = $mod->new;
+    1;
 };
 
-plan skip_all => "no socket available" if $@;
+$gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on;
-
+$gps->on if $sock;
 
 my @stats = qw(
     satellites
@@ -45,9 +47,9 @@ $gps->poll;
 
     is ref $s->{satellites}, 'ARRAY', "SKY->satellites is an aref";
     is ref $s->{satellites}[0], 'HASH', "SKY satellite entries are hrefs";
-    is exists $s->{satellites}[0]{ss}, 1, "each SKY sat entry has individual stats";
+    is exists $s->{satellites}[0]{ss}, 1, "each SKY sat entry has stats";
 }
 
-$gps->off;
+$gps->off if $sock;
 
 done_testing;

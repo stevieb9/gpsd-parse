@@ -1,5 +1,9 @@
 Revision history for GPSD-Parse
 
+0.02 UNREL
+        - reworked initialization code so that a file can be sent in to replay
+          past data and for testing on systems that don't have gpsd. (closes #4)
+
 0.01    2017-05-16
         - first version, released on an unsuspecting world.
         - all current functionality has tests and documentation

@@ -13,11 +13,12 @@ my $fname = 't/data/gps.json';
 
 my $gps;
 
-eval {
+my $sock = eval {
     $gps = GPSD::Parse->new;
+    1;
 };
 
-plan skip_all => "no socket available" if $@;
+$gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
 #
 # with filename
@@ -25,7 +26,7 @@ plan skip_all => "no socket available" if $@;
 
 { # default return with file
 
-    my $res = $gps->poll(fname => $fname);
+    my $res = $gps->poll;
 
     is ref $res, 'HASH', "default return is an href ok";
 
@@ -38,7 +39,7 @@ plan skip_all => "no socket available" if $@;
 
 { # json return
 
-    my $res = $gps->poll(return => 'json', fname => $fname);
+    my $res = $gps->poll(return => 'json');
 
     is ref \$res, 'SCALAR', "json returns a string";
     like $res, qr/^{/, "...and appears to be JSON data";
@@ -50,16 +51,17 @@ plan skip_all => "no socket available" if $@;
     my $res;
 
     my $ok = eval {
-        $res = $gps->poll(fname => 'invalid.file');
+        $res = $gps->poll(file => 'invalid.file');
         1;
     };
 
-    is $ok, undef, "croaks if file can't be opened with fname param";
+    is $ok, undef, "croaks if file can't be opened with file param";
     like $@, qr/invalid\.file/, "...and the error msg is sane";
     undef $@;
 }
 
-{ # on/off
+if ($sock){ # on/off
+
     my $w;
     local $SIG{__WARN__} = sub {
         $w = shift;
