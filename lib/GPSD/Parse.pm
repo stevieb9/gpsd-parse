@@ -228,7 +228,7 @@ JSON format is required to have been previously installed. It should be started
 at system startup, with the following flags with system-specific serial port.
 See the above link for information on changing the listen IP and port.
 
-    sudo gpsd -n /dev/ttyS0 -F /var/log/gpsd.sock
+    sudo gpsd /dev/ttyS0 -n -F /var/log/gpsd.sock
 
 =head2 Available Data
 
