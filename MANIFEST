@@ -14,6 +14,8 @@ t/15-device.t
 t/20-tpv.t
 t/25-satellites.t
 t/30-sky.t
+t/35-unit_conversion.t
+t/40-signed_conversion.t
 t/data/gps.json
 t/manifest.t
 t/pod-coverage.t
