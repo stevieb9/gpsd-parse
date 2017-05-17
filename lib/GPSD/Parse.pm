@@ -5,7 +5,22 @@ use warnings;
 
 use Carp qw(croak);
 use IO::Socket::INET;
-use JSON;
+
+BEGIN {
+
+    # look for JSON::XS, and if not available, fall
+    # back to JSON::PP to avoid requiring non-core modules
+
+    my $json_ok = eval {
+        require JSON::XS;
+        JSON::XS->import;
+        1;
+    };
+    if (! $json_ok){
+        require JSON::PP;
+        JSON::PP->import;
+    }
+}
 
 our $VERSION = '0.01';
 
