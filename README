@@ -39,8 +39,9 @@ SYNOPSIS
 
 DESCRIPTION
 
-    Simple, lightweight distribution that polls gpsd for data received from
-    a UART (serial) connected GPS receiver over a TCP connection.
+    Simple, lightweight (core only) distribution that polls gpsd for data
+    received from a UART (serial/USB) connected GPS receiver over a TCP
+    connection.
 
     The data is fetched in JSON, and returned as Perl data.
 
@@ -63,6 +64,12 @@ NOTES
     tpv(), sattelites() and the more broad sky() method sections to
     understand what available data attributes you can extract.
 
+ Measurement Conversion
+
+    All output where applicable defaults to metric (metres). See the metric
+    parameter in the new() method to change this to use imperial/standard
+    measurements.
+
 METHODS
 
  new(%args)
@@ -80,6 +87,14 @@ METHODS
 
     Optional, Integer: The TCP port number that the gpsd daemon is running
     on. Defaults to 2947 if not sent in.
+
+        metric => Bool
+
+    Optional, Integer: By default, we return measurements in metric
+    (metres). Send in a false value (0) to use imperial/standard
+    measurement conversions (ie. feet). Note that if returning the raw
+    *JSON* data from the poll() method, the conversions will not be done.
+    The default raw Perl return will have been converted however.
 
         file => 'filename.ext'
 

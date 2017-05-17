@@ -29,6 +29,7 @@ sub new {
     my $self = bless {}, $class;
 
     $self->_file($args{file});
+    $self->_metric($args{metric});
 
     if (! $self->_file) {
         $self->_port($args{port});
@@ -92,7 +93,7 @@ sub tpv {
     my ($self, $stat) = @_;
 
     if (defined $stat){
-        return undef if ! defined $self->{tpv}{$stat};
+        return '' if ! defined $self->{tpv}{$stat};
         return $self->{tpv}{$stat};
     }
     return $self->{tpv};
@@ -130,6 +131,12 @@ sub _host {
     $self->{host} = '127.0.0.1' if ! defined $self->{host};
     return $self->{host};
 }
+sub _metric {
+    my ($self, $metric) = @_;
+    $self->{metric} = $metric if defined $metric;
+    $self->{metric} = 1 if ! defined $self->{metric};
+    return $self->{metric};
+}
 sub _port {
     my ($self, $port) = @_;
     $self->{port} = $port if defined $port;
@@ -140,11 +147,20 @@ sub _parse {
     my ($self, $data) = @_;
 
     $self->{tpv}  = $data->{tpv}[0];
-
     $self->{time} = $self->{tpv}{time};
     $self->{device} = $self->{tpv}{device};
-
     $self->{sky} = $data->{sky}[0];
+
+    if (! $self->_metric) {
+        # convert to imperial; feet
+        my @convertable_stats = qw(alt climb speed);
+
+        for (@convertable_stats){
+            my $num = $self->{tpv}{$_};
+            $num = $num * 3.28084;
+            $self->{tpv}{$_} = substr($num, 0, index($num, '.') + 1 + 3);
+        }
+    }
 
     my %sats;
 
@@ -233,7 +249,7 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 =head1 DESCRIPTION
 
 Simple, lightweight (core only) distribution that polls C<gpsd> for data
-received from a UART (serial) connected GPS receiver over a TCP connection.
+received from a UART (serial/USB) connected GPS receiver over a TCP connection.
 
 The data is fetched in JSON, and returned as Perl data.
 
@@ -255,6 +271,12 @@ documentation within the L</METHODS> section. Specifically, look at the
 C<tpv()>, C<sattelites()> and the more broad C<sky()> method sections to
 understand what available data attributes you can extract.
 
+=head2 Measurement Conversion
+
+All output where applicable defaults to metric (metres). See the C<metric>
+parameter in the C<new()> method to change this to use imperial/standard
+measurements.
+
 =head1 METHODS
 
 =head2 new(%args)
@@ -272,6 +294,14 @@ server. Defaults to the localhost (C<127.0.0.1>) if not supplied.
 
 Optional, Integer: The TCP port number that the C<gpsd> daemon is running on.
 Defaults to C<2947> if not sent in.
+
+    metric => Bool
+
+Optional, Integer: By default, we return measurements in metric (metres). Send
+in a false value (C<0>) to use imperial/standard measurement conversions
+(ie. feet). Note that if returning the raw *JSON* data from the C<poll()>
+method, the conversions will not be done. The default raw Perl return will have
+been converted however.
 
     file => 'filename.ext'
 

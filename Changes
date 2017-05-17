@@ -5,6 +5,8 @@ Revision history for GPSD-Parse
           past data and for testing on systems that don't have gpsd. (closes #4)
         - on() is now called by default in new() if in socket mode, and off() is
           likewise called in the destructor
+        - new() now has a 'metric' option to convert to using imperial/standard
+          measurements where applicable (closes #1)
 
 0.01    2017-05-16
         - first version, released on an unsuspecting world.
