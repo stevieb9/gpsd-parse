@@ -6,6 +6,8 @@ use warnings;
 use Carp qw(croak);
 use IO::Socket::INET;
 
+our $VERSION = '0.02';
+
 BEGIN {
 
     # look for JSON::XS, and if not available, fall
@@ -21,8 +23,6 @@ BEGIN {
         JSON::PP->import;
     }
 }
-
-our $VERSION = '0.01';
 
 sub new {
     my ($class, %args) = @_;
