@@ -106,6 +106,8 @@ METHODS
     example:
 
         enabled (default)   disabled
+        -----------------   --------
+    
         lat: 51.12345678    51.12345678N
         lon: -114.123456    114.123456W
 
@@ -183,8 +185,8 @@ METHODS
 
     Optional, String. You can extract individual statistics of the TPV data
     by sending in the name of the stat you wish to fetch. This will then
-    return the string value if available. Returns undef if the statistic
-    doesn't exist.
+    return the string value if available. Returns an empty string if the
+    statistic doesn't exist.
 
     Available statistic/info name, example value, description. This is the
     default raw result:

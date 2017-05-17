@@ -353,6 +353,8 @@ Optional, Integer: By default, we use the signed notation for latitude and
 longitude. Send in a false value (C<0>) to disable this. Here's an example:
 
     enabled (default)   disabled
+    -----------------   --------
+
     lat: 51.12345678    51.12345678N
     lon: -114.123456    114.123456W
 
@@ -424,7 +426,8 @@ Parameters:
 
 Optional, String. You can extract individual statistics of the TPV data by
 sending in the name of the stat you wish to fetch. This will then return the
-string value if available. Returns C<undef> if the statistic doesn't exist.
+string value if available. Returns an empty string if the statistic doesn't
+exist.
 
 Available statistic/info name, example value, description. This is the default
 raw result:

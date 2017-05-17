@@ -64,7 +64,7 @@ $gps->poll;
         is ref \$gps->tpv($_), 'SCALAR', "$_ stat param ok";
     }
 
-    is $gps->tpv('invalid'), undef, "unknown stat param returns undef";
+    is $gps->tpv('invalid'), '', "unknown stat param returns empty string";
 }
 
 $gps->off if $sock;
