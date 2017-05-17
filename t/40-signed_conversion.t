@@ -1,8 +1,5 @@
 use strict;
 use warnings;
-use feature 'say';
-
-#FIXME: remove say
 
 use GPSD::Parse;
 use Test::More;
