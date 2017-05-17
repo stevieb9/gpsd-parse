@@ -6,22 +6,27 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
-my $gps = $mod->new;
-my $fname = 't/data/gps.json';
+my $gps;
 
-my @sats = qw(
-    6 31 19 7 20 23 3 16 13
-);
+eval {
+    $gps = $mod->new;
+};
+
+plan skip_all => "no socket available" if $@;
+
+$gps->on;
 
 my @stats = qw(
     ss el az used
 );
 
-$gps->poll(fname => $fname);
+$gps->poll;
 
 { # default, no param 
 
     my $s = $gps->satellites;
+
+    my @sats = keys %$s;
 
     is ref $s, 'HASH', "satellites() returns a hash ref ok";
 
@@ -38,6 +43,8 @@ $gps->poll(fname => $fname);
 
 { # stat param
 
+    my @sats = keys %{ $gps->satellites };
+
     for my $sat (@sats){
         for (@stats){
             my $ret = $gps->satellites($sat, $_);
@@ -51,5 +58,7 @@ $gps->poll(fname => $fname);
 { # unknown sat
     is $gps->satellites(9999), undef, "satellites() returns undef with unknown sat param";
 }
+
+$gps->off;
 
 done_testing;

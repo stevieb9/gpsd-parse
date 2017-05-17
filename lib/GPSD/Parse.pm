@@ -4,28 +4,28 @@ use strict;
 use warnings;
 
 use Carp qw(croak);
+use IO::Socket::INET;
 use JSON;
 
 our $VERSION = '0.01';
 
 sub new {
     my ($class, %args) = @_;
-    my $self = bless {%args}, $class;
+    my $self = bless {}, $class;
+    $self->_port($args{port});
+    $self->_host($args{host});
     $self->_socket;
     return $self;
 }
 sub on {
-    shift->_socket()->send('?WATCH={"enable": true}');
+    $_[0]->_socket()->send('?WATCH={"enable": true}' . "\n");
 }
 sub off {
-    shift->_socket()->send('?WATCH={"enable": false}');
+    $_[0]->_socket()->send('?WATCH={"enable": false}' . "\n");
 }
 sub poll {
     my ($self, %args) = @_;
   
-    # fname => json file (testing)
-    # return => json
-
     my $gps_json_data;
 
     if ($args{fname}){
@@ -40,15 +40,26 @@ sub poll {
         }
     }
     else {
-        #FIXME: socket read from UART here... (getline())
+        $self->_socket->send("?POLL;\n");
+        local $/ = "\r\n";
+        while (my $line = $self->_socket->getline){
+            chomp $line;
+            my $data = decode_json $line;
+            if ($data->{class} eq 'POLL'){
+                $gps_json_data = $line;
+                last;
+            }
+        }
     }
 
-    #FIXME: check what is returned to ensure the following
-    # line is correct in its assumption
-
-    return undef if ! $gps_json_data;
+    die "no JSON data returned from the GPS" if ! defined $gps_json_data;
 
     my $gps_perl_data = decode_json $gps_json_data;
+
+    if (! defined $gps_perl_data->{tpv}[0]){
+        warn "\n\nincomplete dataset returned from GPS; Did you call the " . 
+             "'on()' method against the main object?\n\n";
+    }
 
     $self->_parse($gps_perl_data);
 
@@ -94,7 +105,7 @@ sub _host {
 }
 sub _port {
     my ($self, $port) = @_;
-    $self->{port} = $host if defined $port;
+    $self->{port} = $port if defined $port;
     $self->{port} = 2947 if ! defined $self->{port};
     return $self->{port};
 }
@@ -121,16 +132,16 @@ sub _parse {
 sub _socket {
     my ($self) = @_;
 
-    if (! defined $self->{socket} && ! defined $self->{socket}->connected){
-        $self->{"socket"}=IO::Socket::INET6->new(
+    if (! defined $self->{socket}){
+        $self->{"socket"}=IO::Socket::INET->new(
                         PeerAddr => $self->_host,
                         PeerPort => $self->_port,
         );
     }
 
-    my ($h, $p) = $self->_host, $self->_port;
+    my ($h, $p) = ($self->_host, $self->_port);
 
-    croak "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
+    die "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
   
     return $self->{'socket'};
 }
@@ -193,8 +204,23 @@ UART (serial) connected GPS receiver over a TCP connection.
 
 The data is fetched in JSON, and returned as Perl data.
 
+=head1 NOTES
+
+=head2 Requirements
+
 A version of L<gpsd|http://catb.org/gpsd/gpsd.html> that returns results in
-JSON format is required to have been previously installed.
+JSON format is required to have been previously installed. It should be started
+at system startup, with the following flags with system-specific serial port.
+See the above link for information on changing the listen IP and port.
+
+    sudo gpsd -n /dev/ttyS0 -F /var/log/gpsd.sock
+
+=head2 Available Data
+
+Each of the methods that return data have a table in their respective
+documentation within the L</METHODS> section. Specifically, look at the
+C<tpv()>, C<sattelites()> and the more broad C<sky()> method sections to
+understand what available data attributes you can extract.
 
 =head1 METHODS
 
@@ -216,11 +242,17 @@ Defaults to C<2947> if not sent in.
 
 =head2 on
 
-Puts C<gpsd> in listening mode, ready to poll data from.
+Puts C<gpsd> in listening mode, ready to poll data from. 
+
+If this method is not called, a warning will be thrown when you C<poll()>, and
+your dataset will be incomplete (ie. invalid).
 
 =head2 off
 
 Turns off C<gpsd> listening mode.
+
+Not necessary to call, but it will help preserve battery life if running on a
+portable device.
 
 =head2 poll(%args)
 
@@ -253,7 +285,6 @@ C<TPV> stands for "Time Position Velocity". This is the data that represents
 your location and other vital statistics.
 
 By default, we return a hash reference that is in the format C<stat => 'value'>.
-#FIXME: add in available stats!
 
 Parameters:
 
@@ -263,9 +294,28 @@ Optional, String. You can extract individual statistics of the TPV data by
 sending in the name of the stat you wish to fetch. This will then return the
 string value if available. Returns C<undef> if the statistic doesn't exist.
 
-=head2 satellites($num, $stat)
+Available statistic/info name, example value, description. This is the default
+raw result:
 
-#FIXME: add sat stat info!
+   time     => '2017-05-16T22:29:29.000Z'   # date/time in UTC
+   lon      => '-114.000000000'             # longitude
+   lat      => '51.000000'                  # latitude
+   alt      => '1084.9'                     # altitude (metres)
+   climb    => '0'                          # rate of ascent/decent (metres/sec)
+   speed    => '0'                          # rate of movement (metres/sec)
+   track    => '279.85'                     # heading (degrees from true north)
+   device   => '/dev/ttyS0'                 # GPS serial interface            
+   mode     => 3                            # NMEA mode
+   epx      => '3.636'                      # longitude error estimate (metres)
+   epy      => '4.676'                      # latitude error estimate (metres)
+   epc      => '8.16'                       # ascent/decent error estimate (meters)
+   ept      => '0.005'                      # timestamp error (sec) 
+   epv      => '4.082'                      # altitude error estimate (meters)
+   eps      => '9.35'                       # speed error estimate (metres/sec)
+   class    => 'TPV'                        # data type (fixed as TPV)
+   tag      => 'ZDA'                        # identifier
+
+=head2 satellites($num, $stat)
 
 This method returns a hash reference of hash references, where the key is the
 satellite number, and the value is a hashref that contains the various
@@ -290,11 +340,43 @@ Optional, String: Like C<tpv()>, you can request an individual piece of
 information for a satellite. This parameter is only valid if you've sent in
 the C<$num> param, and the specified satellite exists.
 
+Available statistic/information items available for each satellite, including
+the name, an example value and a description:
+
+NOTE: The PRN attribute will not appear unless you're using raw data. The PRN
+can be found as the satellite hash reference key after we've processed the
+data.
+
+    PRN     => 16   # PRN ID of the satellite 
+
+                    # 1-63 are GNSS satellites
+                    # 64-96 are GLONASS satellites
+                    # 100-164 are SBAS satellites
+
+    ss      => 20   # signal strength (dB)
+    az      => 161  # azimuth (degrees from true north)
+    used    => 1    # currently being used in calculations
+    el      => 88   # elevation in degrees
+
 =head2 sky
 
 Returns a hash reference containing all of the data that was pulled from the
 C<SKY> information returned by C<gpsd>. This information contains satellite
 info and other related statistics.
+
+Available information, with the attribute, example value and description:
+
+    satellites  => []           # array of satellite hashrefs
+    xdop        => '0.97'       # longitudinal dilution of precision
+    ydop        => '1.25'       # latitudinal dilution of precision
+    pdop        => '1.16'       # spherical dilution of precision
+    tdop        => '2.2'        # time dilution of precision
+    vdop        => '0.71'       # altitude dilution of precision
+    gdop        => '3.87'       # hyperspherical dilution of precision
+    hdop        => '0.92'       # horizontal dilution of precision
+    class       => 'SKY'        # object class, hardcoded to SKY
+    tag         => 'ZDA'        # object ID
+    device      => '/dev/ttyS0' # serial port connected to the GPS
 
 =head2 device
 

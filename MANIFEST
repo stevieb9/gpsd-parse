@@ -1,4 +1,7 @@
 Changes
+examples/gps.pl
+examples/output.json
+examples/output.perl
 lib/GPSD/Parse.pm
 Makefile.PL
 MANIFEST			This list of files

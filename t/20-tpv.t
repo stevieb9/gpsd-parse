@@ -6,14 +6,37 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
-my $gps = $mod->new;
-my $fname = 't/data/gps.json';
+my $gps;
+
+eval {
+    $gps = $mod->new;
+};
+
+plan skip_all => "no socket available" if $@;
+
+$gps->on;
 
 my @stats = qw(
-    ept class mode lat track lon time device speed
+   time
+   lon
+   lat
+   alt
+   climb
+   speed
+   track
+   device
+   mode
+   epx
+   epy
+   epc
+   ept
+   epv
+   eps
+   class
+   tag
 );
 
-$gps->poll(fname => $fname);
+$gps->poll;
 
 { # default, no param 
 
@@ -28,7 +51,7 @@ $gps->poll(fname => $fname);
     }
 
     for (qw(lat lon)){
-        like $t->{$_}, qr/^-?\d+\.\d{8,9}$/, "$_ is in proper format";
+        like $t->{$_}, qr/^-?\d+\.\d{4,9}$/, "$_ is in proper format";
     }
 }
 
@@ -40,5 +63,7 @@ $gps->poll(fname => $fname);
 
     is $gps->tpv('invalid'), undef, "unknown stat param returns undef";
 }
+
+$gps->off;
 
 done_testing;

@@ -30,7 +30,6 @@ WriteMakefile(
         'Test::More' => '0',
     },
     PREREQ_PM => {
-        'JSON' => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'GPSD-Parse-*' },

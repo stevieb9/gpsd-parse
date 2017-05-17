@@ -6,17 +6,33 @@ use Test::More;
 
 my $mod = 'GPSD::Parse';
 
-my $gps = $mod->new;
-my $fname = 't/data/gps.json';
+my $gps;
+
+eval {
+    $gps = $mod->new;
+};
+
+plan skip_all => "no socket available" if $@;
+
+$gps->on;
+
 
 my @stats = qw(
-    hdop time class device satellites
+    satellites
+    xdop
+    ydop
+    pdop
+    tdop
+    vdop
+    gdop
+    hdop
+    class
+    tag
+    device
 );
-
-$gps->poll(fname => $fname);
+$gps->poll;
 
 {
-
     my $s = $gps->sky;
 
     is ref $s, 'HASH', "sky() returns a hash ref ok";
@@ -31,5 +47,7 @@ $gps->poll(fname => $fname);
     is ref $s->{satellites}[0], 'HASH', "SKY satellite entries are hrefs";
     is exists $s->{satellites}[0]{ss}, 1, "each SKY sat entry has individual stats";
 }
+
+$gps->off;
 
 done_testing;

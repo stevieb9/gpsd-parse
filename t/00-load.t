@@ -7,10 +7,15 @@ BEGIN {
     use_ok( 'GPSD::Parse' ) || print "Bail out!\n";
 }
 
-diag( "Testing GPSD::Parse $GPSD::Parse::VERSION, Perl $], $^X" );
+my $gps;
 
-my $gps = GPSD::Parse->new;
+eval {
+    $gps = GPSD::Parse->new;
+};
 
-isa_ok $gps, 'GPSD::Parse', "obj is of appropriate class";
+SKIP: {
+    skip "no socket available", 1 if $@;
+    isa_ok $gps, 'GPSD::Parse', "obj is of appropriate class"
+}
 
 done_testing;
