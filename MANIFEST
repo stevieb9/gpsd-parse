@@ -16,6 +16,7 @@ t/25-satellites.t
 t/30-sky.t
 t/35-unit_conversion.t
 t/40-signed_conversion.t
+t/45-direction.t
 t/data/gps.json
 t/manifest.t
 t/pod-coverage.t

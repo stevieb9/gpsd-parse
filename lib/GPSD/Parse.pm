@@ -108,6 +108,19 @@ sub time {
 sub device {
     return shift->{device};
 }
+sub direction {
+    shift if @_ > 1;
+
+    my ($deg) = @_;
+
+    my @directions = qw(
+        N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW N
+    );
+
+    my $calc = (($deg % 360) / 22.5) + .5;
+
+    return $directions[$calc];
+}
 sub satellites {
     my ($self, $sat_num, $stat) = @_;
 
@@ -366,26 +379,6 @@ Optional, String: For testing purposes. Instead of reading from a socket, send
 in a filename that contains legitimate JSON data saved from a previous C<gpsd>
 output and we'll operate on that. Useful also for re-running previous output.
 
-=head2 on
-
-Puts C<gpsd> in listening mode, ready to poll data from. 
-
-We call this method internally when the object is instantiated with C<new()> if
-we're not in file mode. Likewise, when the object is destroyed (end of program
-run), we call the subsequent C<off()> method.
-
-If you have long periods of a program run where you don't need the GPS, you can
-manually run the C<off()> and C<on()> methods to disable and re-enable the GPS.
-
-=head2 off
-
-Turns off C<gpsd> listening mode.
-
-Not necessary to call, but it will help preserve battery life if running on a
-portable device for long program runs where the GPS is used infrequently. Use in
-conjunction with C<on()>. We call C<off()> automatically when the object goes
-out of scope (program end for example).
-
 =head2 poll(%args)
 
 Does a poll of C<gpsd> for data, and configures the object with that data.
@@ -513,6 +506,41 @@ Available information, with the attribute, example value and description:
     tag         => 'ZDA'        # object ID
     device      => '/dev/ttyS0' # serial port connected to the GPS
 
+=head2 direction($degree)
+
+Converts a degree from true north into a direction (eg: ESE, SW etc).
+
+Parameters:
+
+    $degree
+
+Mandatory, Ineger/Decimal: A decimal ranging from 0-360. Returns the direction
+representing the degree from true north. A common example would be:
+
+    my $heading = $gps->direction($gps->tpv('track'));
+
+Degree/direction map:
+
+    N       348.75 - 11.25
+    NNE     11.25 - 33.75
+    NE      33.75 - 56.25
+    ENE     56.25 - 78.75
+
+    E       78.75 - 101.25
+    ESE     101.25 - 123.75
+    SE      123.75 - 146.25
+    SSE     146.25 - 168.75
+
+    S       168.75 - 191.25
+    SSW     191.25 - 213.75
+    SW      213.75 - 236.25
+    WSW     236.25 - 258.75
+
+    W       258.75 - 281.25
+    WNW     281.25 - 303.75
+    NW      303.75 - 326.25
+    NNW     326.25 - 348.75
+
 =head2 device
 
 Returns a string containing the actual device the GPS is connected to
@@ -521,6 +549,26 @@ Returns a string containing the actual device the GPS is connected to
 =head2 time
 
 Returns a string of the date and time of the most recent poll, in UTC.
+
+=head2 on
+
+Puts C<gpsd> in listening mode, ready to poll data from.
+
+We call this method internally when the object is instantiated with C<new()> if
+we're not in file mode. Likewise, when the object is destroyed (end of program
+run), we call the subsequent C<off()> method.
+
+If you have long periods of a program run where you don't need the GPS, you can
+manually run the C<off()> and C<on()> methods to disable and re-enable the GPS.
+
+=head2 off
+
+Turns off C<gpsd> listening mode.
+
+Not necessary to call, but it will help preserve battery life if running on a
+portable device for long program runs where the GPS is used infrequently. Use in
+conjunction with C<on()>. We call C<off()> automatically when the object goes
+out of scope (program end for example).
 
 =head1 SEE ALSO
 
