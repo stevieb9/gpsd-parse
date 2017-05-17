@@ -34,6 +34,7 @@ sub new {
         $self->_port($args{port});
         $self->_host($args{host});
         $self->_socket;
+        $self->on;
     }
 
     return $self;
@@ -155,8 +156,15 @@ sub _parse {
     }
     $self->{satellites} = \%sats;
 }
+sub _is_socket {
+    my ($self, $status) = @_;
+    $self->{is_socket} = $status if defined $status;
+    return $self->{is_socket};
+}
 sub _socket {
     my ($self) = @_;
+
+    return undef if $self->_file;
 
     if (! defined $self->{socket}){
         $self->{"socket"}=IO::Socket::INET->new(
@@ -170,6 +178,10 @@ sub _socket {
     croak "can't connect to gpsd://$h:$p" if ! defined $self->{socket};
   
     return $self->{'socket'};
+}
+sub DESTROY {
+    my $self = shift;
+    $self->off if $self->_is_socket;
 }
 sub _vim {} # fold placeholder
 
@@ -189,9 +201,8 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 
     my $gps = GPSD::Parse->new;
 
-    # start the data flow, and poll for data
+    # poll for data
 
-    $gps->on;
     $gps->poll;
 
     # get all TPV data in an href
@@ -219,14 +230,10 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 
     print $gps->device;
 
-    # stop capturing data
-
-    $gps->off;
-
 =head1 DESCRIPTION
 
-Simple, lightweight distribution that polls C<gpsd> for data received from a
-UART (serial) connected GPS receiver over a TCP connection.
+Simple, lightweight (core only) distribution that polls C<gpsd> for data
+received from a UART (serial) connected GPS receiver over a TCP connection.
 
 The data is fetched in JSON, and returned as Perl data.
 
@@ -276,15 +283,21 @@ output and we'll operate on that. Useful also for re-running previous output.
 
 Puts C<gpsd> in listening mode, ready to poll data from. 
 
-If this method is not called, a warning will be thrown when you C<poll()>, and
-your dataset will be incomplete (ie. invalid).
+We call this method internally when the object is instantiated with C<new()> if
+we're not in file mode. Likewise, when the object is destroyed (end of program
+run), we call the subsequent C<off()> method.
+
+If you have long periods of a program run where you don't need the GPS, you can
+manually run the C<off()> and C<on()> methods to disable and re-enable the GPS.
 
 =head2 off
 
 Turns off C<gpsd> listening mode.
 
 Not necessary to call, but it will help preserve battery life if running on a
-portable device.
+portable device for long program runs where the GPS is used infrequently. Use in
+conjunction with C<on()>. We call C<off()> automatically when the object goes
+out of scope (program end for example).
 
 =head2 poll(%args)
 
