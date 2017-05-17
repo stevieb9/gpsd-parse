@@ -1,6 +1,6 @@
 Revision history for GPSD-Parse
 
-0.02 UNREL
+0.02    2017-05-17
         - reworked initialization code so that a file can be sent in to replay
           past data and for testing on systems that don't have gpsd. (closes #4)
         - on() is now called by default in new() if in socket mode, and off() is

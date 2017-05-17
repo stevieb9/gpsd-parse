@@ -268,7 +268,6 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 =head1 SYNOPSIS
 
     use GPSD::Parse;
-
     my $gps = GPSD::Parse->new;
 
     # poll for data
@@ -569,6 +568,54 @@ Not necessary to call, but it will help preserve battery life if running on a
 portable device for long program runs where the GPS is used infrequently. Use in
 conjunction with C<on()>. We call C<off()> automatically when the object goes
 out of scope (program end for example).
+
+=head1 EXAMPLE
+
+Here's a simple example using some of the basic features and options.
+
+    use warnings;
+    use strict;
+    use feature 'say';
+
+    use GPSD::Parse;
+
+    my $fname = 't/data/gps.json';
+
+    my $gps = GPSD::Parse->new(file => $fname, signed => 0);
+
+    $gps->poll;
+
+    my $lat = $gps->tpv('lat');
+    my $lon = $gps->tpv('lon');
+
+    my $heading = $gps->tpv('track');
+    my $direction = $gps->direction($heading);
+
+    my $altitude = $gps->tpv('alt');
+
+    my $speed = $gps->tpv('speed');
+
+    say "latitude:  $lat";
+    say "longitude: $lon\n";
+
+    say "heading:   $heading degrees";
+    say "direction: $direction\n";
+
+    say "altitude:  $altitude metres\n";
+
+    say "speed:     $speed metres/sec";
+
+Output:
+
+    latitude:  51.1111111N
+    longitude: 114.11111111W
+
+    heading:   31.23 degrees
+    direction: NNE
+
+    altitude:  1080.9 metres
+
+    speed:     0.333 metres/sec
 
 =head1 SEE ALSO
 
