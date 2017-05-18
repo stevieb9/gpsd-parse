@@ -6,7 +6,7 @@ use warnings;
 use Carp qw(croak);
 use IO::Socket::INET;
 
-our $VERSION = '0.02';
+our $VERSION = '1.00';
 
 BEGIN {
 
@@ -49,11 +49,13 @@ sub off {
 }
 sub poll {
     my ($self, %args) = @_;
-  
+ 
+    $self->_file($args{file});
+
     my $gps_json_data;
 
     if ($self->_file){
-        my $fname = $self->_file($args{file});
+        my $fname = $self->_file;
 
         open my $fh, '<', $fname or croak "can't open file '$fname': $!";
 
@@ -569,9 +571,13 @@ portable device for long program runs where the GPS is used infrequently. Use in
 conjunction with C<on()>. We call C<off()> automatically when the object goes
 out of scope (program end for example).
 
-=head1 EXAMPLE
+=head1 EXAMPLES
 
-Here's a simple example using some of the basic features and options.
+=head2 Basic Features and Options
+
+Here's a simple example using some of the basic features and options. Please
+read through the documentation of the methods (particularly C<new()> and 
+C<tpv()> to get a good grasp on what can be fetched.
 
     use warnings;
     use strict;
@@ -614,6 +620,22 @@ Output:
     altitude:  1080.9 metres
 
     speed:     0.333 metres/sec
+
+
+=head1 TESTING
+
+Please note that we init and disable the GPS device on construction and
+deconstruction of the object respectively. It takes a few seconds for the GPS
+unit to initialize itself and then lock on the satellites before we can get
+readings. For this reason, please understand that one test sweep may pass while
+the next fails.
+
+I am considering adding specific checks, but considering that it's a timing
+thing (seconds, not microseconds that everyone is in a hurry for nowadays) I am
+going to wait until I get a chance to take the kit into the field before I do
+anything drastic.
+
+For now. I'll leave it as is; expect failure if you ram on things too quickly.
 
 =head1 SEE ALSO
 

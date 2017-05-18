@@ -17,8 +17,6 @@ my $sock = eval {
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on if $sock;
-
 { # default return
 
     $gps->poll;
@@ -28,7 +26,5 @@ $gps->on if $sock;
     is ref \$t, 'SCALAR', "device is returned as a string";
     like $t, qr|^/dev/ttyS0$|, "...and is ok"; 
 }
-
-$gps->off if $sock;
 
 done_testing;

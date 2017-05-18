@@ -9,8 +9,6 @@ my $mod = 'GPSD::Parse';
 
 my $fname = 't/data/gps.json';
 
-#FIXME: add tests for using $gps->on using the socket
-
 my $gps;
 
 my $sock = eval {
@@ -19,10 +17,6 @@ my $sock = eval {
 };
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
-
-#
-# with filename
-#
 
 { # default return with file
 
@@ -58,26 +52,6 @@ $gps = GPSD::Parse->new(file => $fname) if ! $sock;
     is $ok, undef, "croaks if file can't be opened with file param";
     like $@, qr/invalid\.file/, "...and the error msg is sane";
     undef $@;
-}
-
-if ($sock){ # on/off
-
-    my $w;
-    local $SIG{__WARN__} = sub {
-        $w = shift;
-    };
-
-    my $res = $gps->poll;
-    is $res->{tpv}[0], undef, "TPV empty if \$gps->on isn't called";
-    like $w, qr/'on\(\)' method/, "...with a proper warning";
-
-    $gps->on;
-    $res = $gps->poll;
-    is ref $res->{tpv}[0], 'HASH', "TPV has data if \$gps->on is called";
-
-    $gps->off;
-    $res = $gps->poll;
-    is $res->{tpv}[0], undef, "TPV undef after off() called";
 }
 
 done_testing;

@@ -17,8 +17,6 @@ my $sock = eval {
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on if $sock;
-
 my @stats = qw(
     satellites
     xdop
@@ -49,7 +47,5 @@ $gps->poll;
     is ref $s->{satellites}[0], 'HASH', "SKY satellite entries are hrefs";
     is exists $s->{satellites}[0]{ss}, 1, "each SKY sat entry has stats";
 }
-
-$gps->off if $sock;
 
 done_testing;

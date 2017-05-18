@@ -17,8 +17,6 @@ my $sock = eval {
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on if $sock;
-
 my @stats = qw(
     ss el az used
 );
@@ -61,7 +59,5 @@ $gps->poll;
 { # unknown sat
     is $gps->satellites(9999), undef, "satellites() returns undef with unknown sat param";
 }
-
-$gps->off if $sock;
 
 done_testing;

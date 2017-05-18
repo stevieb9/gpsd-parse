@@ -1,5 +1,12 @@
 Revision history for GPSD-Parse
 
+1.00    2017-05-17
+        - updated tests and modified poll()'s handling of the file param when
+          running with socket enabled
+        - POD updates/corrections and additions
+        - added example/sky.pl; Q&D satellite printout
+        - all tests pass on a machine in both sock and non-sock mode
+
 0.02    2017-05-17
         - reworked initialization code so that a file can be sent in to replay
           past data and for testing on systems that don't have gpsd. (closes #4)

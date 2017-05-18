@@ -17,8 +17,6 @@ my $sock = eval {
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on if $sock;
-
 { # default return
 
     $gps->poll;
@@ -28,7 +26,5 @@ $gps->on if $sock;
     is ref \$t, 'SCALAR', "time is returned as a string";
     like $t, qr/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, "...and is ok"; 
 }
-
-$gps->off if $sock;
 
 done_testing;

@@ -17,8 +17,6 @@ my $sock = eval {
 
 $gps = GPSD::Parse->new(file => $fname) if ! $sock;
 
-$gps->on if $sock;
-
 my @stats = qw(
    time
    lon
@@ -66,7 +64,5 @@ $gps->poll;
 
     is $gps->tpv('invalid'), '', "unknown stat param returns empty string";
 }
-
-$gps->off if $sock;
 
 done_testing;
