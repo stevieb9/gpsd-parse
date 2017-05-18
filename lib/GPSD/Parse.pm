@@ -6,7 +6,7 @@ use warnings;
 use Carp qw(croak);
 use IO::Socket::INET;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 BEGIN {
 
