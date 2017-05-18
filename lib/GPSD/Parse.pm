@@ -36,16 +36,17 @@ sub new {
         $self->_port($args{port});
         $self->_host($args{host});
         $self->_socket;
+        $self->_is_socket(1);
         $self->on;
     }
 
     return $self;
 }
 sub on {
-    $_[0]->_socket()->send('?WATCH={"enable": true}' . "\n");
+    $_[0]->_socket->send('?WATCH={"enable": true}' . "\n");
 }
 sub off {
-    $_[0]->_socket()->send('?WATCH={"enable": false}' . "\n");
+    $_[0]->_socket->send('?WATCH={"enable": false}' . "\n");
 }
 sub poll {
     my ($self, %args) = @_;
@@ -83,8 +84,7 @@ sub poll {
     my $gps_perl_data = decode_json $gps_json_data;
 
     if (! defined $gps_perl_data->{tpv}[0]){
-        warn "\n\nincomplete dataset returned from GPS; Did you call the " . 
-             "'on()' method against the main object?\n\n";
+        warn "\n\nincomplete or empty dataset returned from GPS...\n\n";
     }
 
     $self->_parse($gps_perl_data);
@@ -412,7 +412,8 @@ original JSON string.
 C<TPV> stands for "Time Position Velocity". This is the data that represents
 your location and other vital statistics.
 
-By default, we return a hash reference that is in the format C<stat => 'value'>.
+By default, we return a hash reference. The format of the hash is depicted
+below.
 
 Parameters:
 
@@ -621,6 +622,74 @@ Output:
 
     speed:     0.333 metres/sec
 
+=head2 Displaying Satellite Information
+
+Here's a rough example that displays the status of tracked satellites, along
+with the information on the one's we're currently using.
+
+    use warnings;
+    use strict;
+
+    use GPSD::Parse;
+
+    my $gps = GPSD::Parse->new;
+
+    while (1){
+        $gps->poll;
+        my $sats = $gps->satellites;
+
+        for my $sat (keys %$sats){
+            if (! $gps->satellites($sat, 'used')){
+                print "$sat: unused\n";
+            }
+            else {
+                print "$sat: used\n";
+                for (keys %{ $sats->{$sat} }){
+                    print "\t$_: $sats->{$sat}{$_}\n";
+                }
+            }
+        }
+        sleep 3;
+    }
+
+Output:
+
+    7: used
+        ss: 20
+        used: 1
+        az: 244
+        el: 20
+    29: unused
+    31: used
+        el: 12
+        az: 64
+        used: 1
+        ss: 17
+    6: unused
+    138: unused
+    16: used
+        ss: 17
+        el: 53
+        used: 1
+        az: 119
+    26: used
+        az: 71
+        used: 1
+        el: 46
+        ss: 27
+    22: used
+        ss: 28
+        el: 17
+        used: 1
+        az: 175
+    3: used
+        ss: 24
+        az: 192
+        used: 1
+        el: 40
+    9: unused
+    23: unused
+    2: unused
 
 =head1 TESTING
 

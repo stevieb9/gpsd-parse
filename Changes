@@ -1,5 +1,11 @@
 Revision history for GPSD-Parse
 
+1.01 UNREL
+        - slight code cleanup
+        - POD fixes
+        - added satellite listing example in POD
+        - small fix to t/05-tpv.t. Needed to instantiate a scoped object
+
 1.00    2017-05-17
         - updated tests and modified poll()'s handling of the file param when
           running with socket enabled
