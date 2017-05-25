@@ -136,80 +136,18 @@ sub satellites {
     }
     return $self->{satellites};
 }
-sub _file {
-    my ($self, $file) = @_;
-    $self->{file} = $file if defined $file;
-    return $self->{file};
+sub feet {
+    return $_[0]->_is_metric(0);
 }
-sub _host {
-    my ($self, $host) = @_;
-    $self->{host} = $host if defined $host;
-    $self->{host} = '127.0.0.1' if ! defined $self->{host};
-    return $self->{host};
-}
-sub _is_metric {
-    # whether we're in feet or metres mode
-    my ($self, $metric) = @_;
-    $self->{metric} = $metric if defined $metric;
-    $self->{metric} = 1 if ! defined $self->{metric};
-    return $self->{metric};
-}
-sub _port {
-    my ($self, $port) = @_;
-    $self->{port} = $port if defined $port;
-    $self->{port} = 2947 if ! defined $self->{port};
-    return $self->{port};
-}
-sub _parse {
-    # parse the GPS data and populate the object
-    my ($self, $data) = @_;
-
-    $self->{tpv}  = $data->{tpv}[0];
-    $self->{time} = $self->{tpv}{time};
-    $self->{device} = $self->{tpv}{device};
-    $self->{sky} = $data->{sky}[0];
-
-    if (! $self->_is_metric) {
-        # convert to imperial; feet
-        my @convertable_stats = qw(alt climb speed);
-
-        for (@convertable_stats){
-            my $num = $self->{tpv}{$_};
-            $num = $num * 3.28084;
-            $self->{tpv}{$_} = substr($num, 0, index($num, '.') + 1 + 3);
-        }
-    }
-
-    my ($lat, $lon) = ($self->{tpv}{lat}, $self->{tpv}{lon});
-
-    ($self->{tpv}{lat}, $self->{tpv}{lon}) = $self->_is_signed
-        ? $self->signed($lat, $lon)
-        : $self->unsigned($lat, $lon);
-
-    my %sats;
-
-    for my $sat (@{ $self->{sky}{satellites} }){
-        my $prn = $sat->{PRN};
-        delete $sat->{PRN};
-        $sat->{used} = $sat->{used} ? 1 : 0;
-        $sats{$prn} = $sat;
-    }
-    $self->{satellites} = \%sats;
-}
-sub _is_signed {
-    # set whether we're in signed or unsigned mode
-    my ($self, $signed) = @_;
-    $self->{signed} = $signed if defined $signed;
-    $self->{signed} = 1 if ! defined $self->{signed};
-    return $self->{signed};
+sub metres {
+    return $_[0]->_is_metric(1);
 }
 sub signed {
     my $self = shift;
 
     if (! @_){
         # caller just wants to set is_signed
-        $self->_is_signed(1);
-        return $self->_is_signed;
+        return $self->_is_signed(1);
     }
 
     my ($lat, $lon) = @_;
@@ -237,8 +175,7 @@ sub unsigned {
 
     if (! @_){
         # caller just wants to set unsigned
-        $self->_is_signed(0);
-        return $self->_is_signed;;
+        return $self->_is_signed(0);
     }
     my ($lat, $lon) = @_;
 
@@ -260,6 +197,81 @@ sub unsigned {
     }
 
     return ($lat, $lon);
+}
+sub _convert {
+    my $self = shift;
+
+    my @convertable_stats = qw(alt climb speed);
+
+    if (! $self->_is_metric){
+        for (@convertable_stats) {
+            my $num = $self->{tpv}{$_};
+            $num = $num * 3.28084;
+            $self->{tpv}{$_} = substr($num, 0, index($num, '.') + 1 + 3);
+        }
+    }
+}
+sub _file {
+    my ($self, $file) = @_;
+    $self->{file} = $file if defined $file;
+    return $self->{file};
+}
+sub _host {
+    my ($self, $host) = @_;
+    $self->{host} = $host if defined $host;
+    $self->{host} = '127.0.0.1' if ! defined $self->{host};
+    return $self->{host};
+}
+sub _is_metric {
+    # whether we're in feet or metres mode
+    my ($self, $metric) = @_;
+    $self->{metric} = $metric if defined $metric;
+    $self->{metric} = 1 if ! defined $self->{metric};
+    return $self->{metric};
+}
+sub _is_signed {
+    # set whether we're in signed or unsigned mode
+    my ($self, $signed) = @_;
+    $self->{signed} = $signed if defined $signed;
+    $self->{signed} = 1 if ! defined $self->{signed};
+    return $self->{signed};
+}
+sub _port {
+    my ($self, $port) = @_;
+    $self->{port} = $port if defined $port;
+    $self->{port} = 2947 if ! defined $self->{port};
+    return $self->{port};
+}
+sub _parse {
+    # parse the GPS data and populate the object
+    my ($self, $data) = @_;
+
+    $self->{tpv}  = $data->{tpv}[0];
+    $self->{time} = $self->{tpv}{time};
+    $self->{device} = $self->{tpv}{device};
+    $self->{sky} = $data->{sky}[0];
+
+    # perform conversions on metric/standard if necessary
+
+    $self->_convert;
+
+    # perform conversions on the lat/long if necessary
+
+    my ($lat, $lon) = ($self->{tpv}{lat}, $self->{tpv}{lon});
+
+    ($self->{tpv}{lat}, $self->{tpv}{lon}) = $self->_is_signed
+        ? $self->signed($lat, $lon)
+        : $self->unsigned($lat, $lon);
+
+    my %sats;
+
+    for my $sat (@{ $self->{sky}{satellites} }){
+        my $prn = $sat->{PRN};
+        delete $sat->{PRN};
+        $sat->{used} = $sat->{used} ? 1 : 0;
+        $sats{$prn} = $sat;
+    }
+    $self->{satellites} = \%sats;
 }
 sub _is_socket {
     # check if we're in socket mode
@@ -364,7 +376,8 @@ understand what available data attributes you can extract.
 
 All output where applicable defaults to metric (metres). See the C<metric>
 parameter in the C<new()> method to change this to use imperial/standard
-measurements.
+measurements. You can also toggle this at runtime with the C<metres()> and
+C<feet()> methods.
 
 For latitude and longitude, we default to using the signed notation. You can
 disable this with the C<signed> parameter in C<new()>, along with the
@@ -625,6 +638,17 @@ and the results will be visible after the next C<poll()>.
 You can optionally use this method to convert values in a manual way. Simply
 send in the latitude and longitude in that order as parameters, and we'll return
 a list containing them both after modification, if it was necessary.
+
+=head2 feet
+
+By default, we use metres as the measurement for any attribute that is measured
+in distance. Call this method to have all attributes converted into feet
+commencing at the next call to C<poll()>. Use C<metres()> to revert back.
+
+=head2 metres
+
+We measure in metres by default. If you've switched to using feet as the
+measurement unit, a call to this method will revert back to the default.
 
 =head2 on
 

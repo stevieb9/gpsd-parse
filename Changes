@@ -8,6 +8,7 @@ Revision history for GPSD-Parse
         - added signed() and unsigned(). Modifies the output for lat/lon during
           runtime. Send in $lat, $lon to optionally leave the object alone for
           manual one-off conversions
+        - added metres() and feet() methods. These toggle at runtime
 
 1.00    2017-05-17
         - updated tests and modified poll()'s handling of the file param when
