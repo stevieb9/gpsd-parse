@@ -204,13 +204,35 @@ sub _is_signed {
     $self->{signed} = 1 if ! defined $self->{signed};
     return $self->{signed};
 }
-sub _signed_convert {
-    # perform the actual lat/long conversion
-    # we do it here for testing purposes
+sub signed {
+    shift if @_ == 3;
+    my ($lat, $lon) = @_;
+
+    return ($lat, $lon) if $lat !~ /[NESW]$/;
+    return ($lat, $lon) if $lon !~ /[NESW]$/;
+
+    my %directions = (
+        W => '-',
+        E => '',
+        N => '',
+        S => '-',
+    );
+
+    for ($lat, $lon){
+        my ($dir) = $_ =~ /([NESW])$/;
+        s/([NESW])$//;
+        $_ = $directions{$dir} . $_;
+    }
+
+    return ($lat, $lon);
+}
+sub unsigned {
 
     shift if @_ == 3;
-
     my ($lat, $lon) = @_;
+
+    return ($lat, $lon) if $lat =~ /[NESW]$/;
+    return ($lat, $lon) if $lon =~ /[NESW]$/;
 
     if ($lat =~ /^-/) {
         $lat =~ s/-(.*)/${1}S/;
