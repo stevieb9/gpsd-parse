@@ -180,12 +180,11 @@ sub _parse {
         }
     }
 
-    if (! $self->_is_signed){
-        # switch between signed lat/long
+    my ($lat, $lon) = ($self->{tpv}{lat}, $self->{tpv}{lon});
 
-        ($self->{tpv}{lat}, $self->{tpv}{lon})
-            = $self->_signed_convert($self->{tpv}{lat}, $self->{tpv}{lon});
-    }
+    ($self->{tpv}{lat}, $self->{tpv}{lon}) = $self->_is_signed
+        ? $self->signed($lat, $lon)
+        : $self->unsigned($lat, $lon);
 
     my %sats;
 
@@ -205,7 +204,14 @@ sub _is_signed {
     return $self->{signed};
 }
 sub signed {
-    shift if @_ == 3;
+    my $self = shift;
+
+    if (! @_){
+        # caller just wants to set is_signed
+        $self->_is_signed(1);
+        return $self->_is_signed;
+    }
+
     my ($lat, $lon) = @_;
 
     return ($lat, $lon) if $lat !~ /[NESW]$/;
@@ -227,8 +233,13 @@ sub signed {
     return ($lat, $lon);
 }
 sub unsigned {
+    my $self = shift;
 
-    shift if @_ == 3;
+    if (! @_){
+        # caller just wants to set unsigned
+        $self->_is_signed(0);
+        return $self->_is_signed;;
+    }
     my ($lat, $lon) = @_;
 
     return ($lat, $lon) if $lat =~ /[NESW]$/;
@@ -356,7 +367,8 @@ parameter in the C<new()> method to change this to use imperial/standard
 measurements.
 
 For latitude and longitude, we default to using the signed notation. You can
-disable this with the C<signed> parameter in C<new()>.
+disable this with the C<signed> parameter in C<new()>, along with the
+C<signed()> and C<unsigned()> methods to toggle this conversion at runtime.
 
 =head1 METHODS
 
@@ -396,6 +408,10 @@ longitude. Send in a false value (C<0>) to disable this. Here's an example:
     lon: -114.123456    114.123456W
 
 We add the letter notation at the end of the result if C<signed> is disabled.
+
+NOTE: You can toggle this at runtime by calling the C<signed()> and
+C<unsigned()> methods. The data returned at the next poll will reflect any
+change.
 
     file => 'filename.ext'
 
@@ -574,6 +590,41 @@ Returns a string containing the actual device the GPS is connected to
 =head2 time
 
 Returns a string of the date and time of the most recent poll, in UTC.
+
+=head2 signed
+
+This method works on the latitude and longitude output view. By default, we use
+signed notation, eg:
+
+    -114.1111111111 # lon
+    51.111111111111 # lat
+
+If you've switched to C<unsigned()>, calling this method will toggle it back,
+and the results will be visible after the next C<poll()>.
+
+You can optionally use this method to convert values in a manual way. Simply
+send in the latitude and longitude in that order as parameters, and we'll return
+a list containing them both after modification, if it was necessary.
+
+=head2 unsigned
+
+This method works on the latitude and longitude output view. By default, we use
+signed notation, eg:
+
+    -114.1111111111 # lon
+    51.111111111111 # lat
+
+Calling this method will convert those to:
+
+    114.1111111111W # lon
+    51.11111111111N # lat
+
+If you've switched to C<signed()>, calling this method will toggle it back,
+and the results will be visible after the next C<poll()>.
+
+You can optionally use this method to convert values in a manual way. Simply
+send in the latitude and longitude in that order as parameters, and we'll return
+a list containing them both after modification, if it was necessary.
 
 =head2 on
 

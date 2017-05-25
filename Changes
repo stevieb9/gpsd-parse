@@ -5,6 +5,9 @@ Revision history for GPSD-Parse
         - POD fixes
         - added satellite listing example in POD
         - small fix to t/05-tpv.t. Needed to instantiate a scoped object
+        - added signed() and unsigned(). Modifies the output for lat/lon during
+          runtime. Send in $lat, $lon to optionally leave the object alone for
+          manual one-off conversions
 
 1.00    2017-05-17
         - updated tests and modified poll()'s handling of the file param when
