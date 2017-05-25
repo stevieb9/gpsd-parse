@@ -29,8 +29,8 @@ sub new {
     my $self = bless {}, $class;
 
     $self->_file($args{file});
-    $self->_metric($args{metric});
-    $self->_signed($args{signed});
+    $self->_is_metric($args{metric});
+    $self->_is_signed($args{signed});
 
     if (! $self->_file) {
         $self->_port($args{port});
@@ -147,7 +147,8 @@ sub _host {
     $self->{host} = '127.0.0.1' if ! defined $self->{host};
     return $self->{host};
 }
-sub _metric {
+sub _is_metric {
+    # whether we're in feet or metres mode
     my ($self, $metric) = @_;
     $self->{metric} = $metric if defined $metric;
     $self->{metric} = 1 if ! defined $self->{metric};
@@ -168,7 +169,7 @@ sub _parse {
     $self->{device} = $self->{tpv}{device};
     $self->{sky} = $data->{sky}[0];
 
-    if (! $self->_metric) {
+    if (! $self->_is_metric) {
         # convert to imperial; feet
         my @convertable_stats = qw(alt climb speed);
 
@@ -179,7 +180,7 @@ sub _parse {
         }
     }
 
-    if (! $self->_signed){
+    if (! $self->_is_signed){
         # switch between signed lat/long
 
         ($self->{tpv}{lat}, $self->{tpv}{lon})
@@ -196,8 +197,8 @@ sub _parse {
     }
     $self->{satellites} = \%sats;
 }
-sub _signed {
-    # convert between signed location and alpha
+sub _is_signed {
+    # set whether we're in signed or unsigned mode
     my ($self, $signed) = @_;
     $self->{signed} = $signed if defined $signed;
     $self->{signed} = 1 if ! defined $self->{signed};
