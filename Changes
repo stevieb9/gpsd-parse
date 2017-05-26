@@ -1,6 +1,6 @@
 Revision history for GPSD-Parse
 
-1.01 UNREL
+1.01    2017-05-26
         - slight code cleanup
         - POD fixes
         - added satellite listing example in POD

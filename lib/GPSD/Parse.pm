@@ -347,6 +347,11 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
 
     print $gps->device;
 
+    # toggle between metres and feet (metres by default)
+
+    $gps->feet;
+    $gps->metres;
+
 =head1 DESCRIPTION
 
 Simple, lightweight (core only) distribution that polls C<gpsd> for data
@@ -376,8 +381,8 @@ understand what available data attributes you can extract.
 
 All output where applicable defaults to metric (metres). See the C<metric>
 parameter in the C<new()> method to change this to use imperial/standard
-measurements. You can also toggle this at runtime with the C<metres()> and
-C<feet()> methods.
+measurements. You can also toggle this at runtime with the C<feet()> and
+C<metres()> methods.
 
 For latitude and longitude, we default to using the signed notation. You can
 disable this with the C<signed> parameter in C<new()>, along with the
