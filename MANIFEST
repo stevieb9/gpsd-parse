@@ -18,6 +18,7 @@ t/20-tpv.t
 t/25-satellites.t
 t/30-sky.t
 t/35-unit_conversion.t
+t/40-metres_feet.t
 t/45-direction.t
 t/50-signed.t
 t/55-unsigned.t
