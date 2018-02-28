@@ -92,6 +92,9 @@ sub poll {
     return $gps_json_data if defined $args{return} && $args{return} eq 'json';
     return $gps_perl_data;
 }
+
+# tpv methods
+
 sub tpv {
     my ($self, $stat) = @_;
 
@@ -101,12 +104,48 @@ sub tpv {
     }
     return $self->{tpv};
 }
-sub sky {
-    return shift->{sky};
-}
+
 sub time {
     return shift->{time};
 }
+sub lon {
+    return $_[0]->tpv('lon');
+}
+sub lat {
+    return $_[0]->tpv('lat');
+}
+sub alt {
+    return $_[0]->tpv('alt');
+}
+sub climb {
+    return $_[0]->tpv('climb');
+}
+sub speed {
+    return $_[0]->tpv('speed');
+}
+sub track {
+    return $_[0]->tpv('track');
+}
+
+# sky methods
+
+sub sky {
+    return shift->{sky};
+}
+sub satellites {
+    my ($self, $sat_num, $stat) = @_;
+
+    if (defined $sat_num){
+        return undef if ! defined $self->{satellites}{$sat_num};
+    }
+
+    if (defined $sat_num && defined $stat){
+        return undef if ! defined $self->{satellites}{$sat_num}{$stat};
+        return $self->{satellites}{$sat_num}{$stat};
+    }
+    return $self->{satellites};
+}
+
 sub device {
     return shift->{device};
 }
@@ -123,19 +162,7 @@ sub direction {
 
     return $directions[$calc];
 }
-sub satellites {
-    my ($self, $sat_num, $stat) = @_;
 
-    if (defined $sat_num){
-        return undef if ! defined $self->{satellites}{$sat_num};
-    }
-
-    if (defined $sat_num && defined $stat){
-        return undef if ! defined $self->{satellites}{$sat_num}{$stat};
-        return $self->{satellites}{$sat_num}{$stat};
-    }
-    return $self->{satellites};
-}
 sub feet {
     return $_[0]->_is_metric(0);
 }
@@ -331,6 +358,11 @@ GPSD::Parse - Parse, extract use the JSON output from GPS units
     print $gps->tpv('lat');
     print $gps->tpv('lon');
 
+    # ...or
+
+    print $gps->lat;
+    print $gps->lon;
+
     # timestamp of the most recent poll
 
     print $gps->time;
@@ -464,13 +496,40 @@ Returns:
 The raw poll data as either a Perl hash reference structure or as the
 original JSON string.
 
+=head2 lon
+
+Returns the longitude. Alias for C<< $gps->tpv('lon') >>.
+
+=head2 lat
+
+Returns the latitude. Alias for C<< $gps->tpv('lat') >>.
+
+=head2 alt
+
+Returns the altitude. Alias for C<< $gps->tpv('alt') >>.
+
+=head2 climb
+
+Returns the rate of ascent/decent. Alias for C<< $gps->tpv('climb') >>.
+
+=head2 speed
+
+Returns the rate of movement. Alias for C<< $gps->tpv('speed') >>.
+
+=head2 track
+
+Returns the direction of movement, in degrees. Alias for
+C<< $gps->tpv('track') >>.
+
 =head2 tpv($stat)
 
 C<TPV> stands for "Time Position Velocity". This is the data that represents
 your location and other vital statistics.
 
 By default, we return a hash reference. The format of the hash is depicted
-below.
+below. Note also that the most frequently used stats also have their own
+methods that can be called on the object as opposed to having to reach into
+a hash reference.
 
 Parameters:
 
