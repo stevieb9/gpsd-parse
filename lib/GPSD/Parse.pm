@@ -104,10 +104,6 @@ sub tpv {
     }
     return $self->{tpv};
 }
-
-sub time {
-    return shift->{time};
-}
 sub lon {
     return $_[0]->tpv('lon');
 }
@@ -146,9 +142,17 @@ sub satellites {
     return $self->{satellites};
 }
 
+# device methods
+
 sub device {
     return shift->{device};
 }
+sub time {
+    return shift->{time};
+}
+
+# helper/convenience methods
+
 sub direction {
     shift if @_ > 1;
 
@@ -162,7 +166,6 @@ sub direction {
 
     return $directions[$calc];
 }
-
 sub feet {
     return $_[0]->_is_metric(0);
 }
@@ -225,6 +228,9 @@ sub unsigned {
 
     return ($lat, $lon);
 }
+
+# private methods
+
 sub _convert {
     my $self = shift;
 
@@ -635,7 +641,7 @@ Parameters:
 Mandatory, Ineger/Decimal: A decimal ranging from 0-360. Returns the direction
 representing the degree from true north. A common example would be:
 
-    my $heading = $gps->direction($gps->tpv('track'));
+    my $heading = $gps->direction($gps->track);
 
 Degree/direction map:
 
@@ -752,15 +758,15 @@ C<tpv()> to get a good grasp on what can be fetched.
 
     $gps->poll;
 
-    my $lat = $gps->tpv('lat');
-    my $lon = $gps->tpv('lon');
+    my $lat = $gps->lat;
+    my $lon = $gps->lon;
 
-    my $heading = $gps->tpv('track');
-    my $direction = $gps->direction($heading);
+    my $heading = $gps->track; # degrees
+    my $direction = $gps->direction($heading); # ENE etc
 
-    my $altitude = $gps->tpv('alt');
+    my $altitude = $gps->alt;
 
-    my $speed = $gps->tpv('speed');
+    my $speed = $gps->speed;
 
     say "latitude:  $lat";
     say "longitude: $lon\n";
@@ -883,7 +889,7 @@ Steve Bertrand, C<< <steveb at cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2017 Steve Bertrand.
+Copyright 2018 Steve Bertrand.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

@@ -1,6 +1,6 @@
 Revision history for GPSD-Parse
 
-1.02 UNREL
+1.02    2018-02-28
         - added convenience methods lon(), lat(), alt(), climb(), speed() and
           track(). This alleviates a user from having to expand the indivitual
           statistic from tpv()
