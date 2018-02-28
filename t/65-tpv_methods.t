@@ -35,12 +35,14 @@ $gps->poll;
         is defined $gps->$_, 1, "$_ method is available";
     }
 
-    is $gps->lon, '-114.11111111', "lon() has proper output";
-    is $gps->lat, '51.1111111', "lat() has proper output";
-    is $gps->alt, '1080.9', "alt() has proper output";
-    is $gps->climb, '2.111', "climb() has proper output";
-    is $gps->speed, '0.333', "speed() has proper output";
-    is $gps->track, '31.23', "track() has proper output";
+    if (! $sock) {
+        is $gps->lon, '-114.11111111', "lon() has proper output";
+        is $gps->lat, '51.1111111', "lat() has proper output";
+        is $gps->alt, '1080.9', "alt() has proper output";
+        is $gps->climb, '2.111', "climb() has proper output";
+        is $gps->speed, '0.333', "speed() has proper output";
+        is $gps->track, '31.23', "track() has proper output";
+    }
 }
 
 done_testing;
