@@ -746,7 +746,7 @@ out of scope (program end for example).
 
 Here's a simple example using some of the basic features and options. Please
 read through the documentation of the methods (particularly C<new()> and 
-C<tpv()> to get a good grasp on what can be fetched.
+C<tpv()> to get a good grasp on what can be fetched).
 
     use warnings;
     use strict;
