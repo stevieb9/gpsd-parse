@@ -793,7 +793,7 @@ Output:
 =head2 Displaying Satellite Information
 
 Here's a rough example that displays the status of tracked satellites, along
-with the information on the one's we're currently using.
+with the information on the ones we're currently using.
 
     use warnings;
     use strict;
