@@ -1,5 +1,8 @@
 Revision history for GPSD-Parse
 
+1.04 UNREL
+        -
+
 1.03    2019-10-23
         - fix issue in t/device.t where we were looking for a specific serial
           interface name, but may differ from the regex if there's a real GPS
