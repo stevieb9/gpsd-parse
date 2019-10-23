@@ -1,7 +1,9 @@
 Revision history for GPSD-Parse
 
 1.03 UNREL
-        -
+        - fix issue in t/device.t where we were looking for a specific serial
+          interface name, but may differ from the regex if there's a real GPS
+          device connected (fixes #11, work on #9)
 
 1.02    2018-02-28
         - added convenience methods lon(), lat(), alt(), climb(), speed() and
