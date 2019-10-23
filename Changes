@@ -10,6 +10,7 @@ Revision history for GPSD-Parse
           poll() if no data is available, instead of running blindly ahead and
           throwing irrelevant warnings (fixes #9)
         - added note about running gpsd with the '-n' flag
+        - update tests to better handle test runs whether in file or socket mode
 
 1.02    2018-02-28
         - added convenience methods lon(), lat(), alt(), climb(), speed() and
