@@ -84,7 +84,8 @@ sub poll {
     my $gps_perl_data = decode_json $gps_json_data;
 
     if (! defined $gps_perl_data->{tpv}[0]){
-        warn "\n\nincomplete or empty dataset returned from GPS...\n\n";
+        warn "\n\nWaiting for valid GPS signal...\n\n";
+        return;
     }
 
     $self->_parse($gps_perl_data);
@@ -407,6 +408,12 @@ at system startup, with the following flags with system-specific serial port.
 See the above link for information on changing the listen IP and port.
 
     sudo gpsd /dev/ttyS0 -n -F /var/log/gpsd.sock
+
+NOTE: The C<-n> flag *must* be present when running C<gpsd>. If not, this
+software will stay in an endless loop of "Waiting for a valid GPS signal", even
+if the GPS device has been triangulated. See your Operating Systems startup
+system to add this flag to the startup if necessary (on Ubuntu, add "-n" to the
+C<GPSD_OPTIONS> section in C</etc/defaults/gpsd>).
 
 =head2 Available Data
 

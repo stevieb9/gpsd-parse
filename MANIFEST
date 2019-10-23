@@ -1,8 +1,6 @@
 Changes
 examples/gps.pl
 examples/gpsd.sh
-examples/output.json
-examples/output.perl
 examples/sat.pl
 examples/syn.pl
 lib/GPSD/Parse.pm
