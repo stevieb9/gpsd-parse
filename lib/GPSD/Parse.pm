@@ -419,19 +419,21 @@ C<GPSD_OPTIONS> section in C</etc/defaults/gpsd>).
 
 Each of the methods that return data have a table in their respective
 documentation within the L</METHODS> section. Specifically, look at the
-L</tpv($stat)>, L</satellites($num, $stat)> and the more broad L</sky> method
-sections to understand what available data attributes you can extract.
+L<tpv()|/tpv($stat)>, L<satellites()|/satellites($num, $stat)> and the more
+broad L<sky()|/sky> method sections to understand what available data attributes
+you can extract.
 
 =head2 Conversions
 
 All output where applicable defaults to metric (metres). See the C<metric>
-parameter in the L</new(%args)> method to change this to use imperial/standard
-measurements. You can also toggle this at runtime with the L</feet> and
-L</metres> methods.
+parameter in the L<new()|/new(%args)> method to change this to use imperial/standard
+measurements. You can also toggle this at runtime with the L<feet()|/feet> and
+L<metres()|/metres> methods.
 
 For latitude and longitude, we default to using the signed notation. You can
-disable this with the C<signed> parameter in L</new(%args)>, along with the
-L</signed> and L</unsigned> methods to toggle this conversion at runtime.
+disable this with the C<signed> parameter in L<new()|/new(%args)>, along with the
+L<signed()|/signed> and L<unsigned()|/unsigned> methods to toggle this
+conversion at runtime.
 
 =head1 METHODS
 
@@ -455,9 +457,9 @@ Defaults to C<2947> if not sent in.
 
 Optional, Integer: By default, we return measurements in metric (metres). Send
 in a false value (C<0>) to use imperial/standard measurement conversions
-(ie. feet). Note that if returning the raw *JSON* data from the L</poll(%args)>
-method, the conversions will not be done. The default raw Perl return will have
-been converted however.
+(ie. feet). Note that if returning the raw *JSON* data from the
+L<poll()|/poll(%args)> method, the conversions will not be done. The default raw
+Perl return will have been converted however.
 
     signed => Bool
 
@@ -472,9 +474,9 @@ longitude. Send in a false value (C<0>) to disable this. Here's an example:
 
 We add the letter notation at the end of the result if C<signed> is disabled.
 
-NOTE: You can toggle this at runtime by calling the L</signed> and
-L</unsigned> methods. The data returned at the next poll will reflect any
-change.
+NOTE: You can toggle this at runtime by calling the L<signed()|/signed> and
+L<unsigned()|/unsigned> methods. The data returned at the next poll will reflect
+any change.
 
     file => 'filename.ext'
 
@@ -582,7 +584,7 @@ information related to the specific numbered satellite.
 
 Note that the data returned by this function has been manipuated and is not
 exactly equivalent of that returned by C<gpsd>. To get the raw data, see 
-L</sky>.
+L<sky()|/sky>.
 
 Parameters:
 
@@ -689,8 +691,8 @@ signed notation, eg:
     -114.1111111111 # lon
     51.111111111111 # lat
 
-If you've switched to L</unsigned>, calling this method will toggle it back,
-and the results will be visible after the next L</poll(%args)>
+If you've switched to L<unsigned()|/unsigned>, calling this method will toggle
+it back, and the results will be visible after the next L<poll()|/poll(%args)>.
 
 You can optionally use this method to convert values in a manual way. Simply
 send in the latitude and longitude in that order as parameters, and we'll return
@@ -709,8 +711,8 @@ Calling this method will convert those to:
     114.1111111111W # lon
     51.11111111111N # lat
 
-If you've switched to L</signed> calling this method will toggle it back,
-and the results will be visible after the next L</poll(%args)>.
+If you've switched to L<signed()|/signed> calling this method will toggle it
+back, and the results will be visible after the next L<poll()|/poll(%args)>.
 
 You can optionally use this method to convert values in a manual way. Simply
 send in the latitude and longitude in that order as parameters, and we'll return
@@ -720,7 +722,8 @@ a list containing them both after modification, if it was necessary.
 
 By default, we use metres as the measurement for any attribute that is measured
 in distance. Call this method to have all attributes converted into feet
-commencing at the next call to L</poll(%args)>. Use L</metres> to revert back.
+commencing at the next call to L<poll()|/poll(%args)>. Use L<metres()|/metres>
+to revert back.
 
 =head2 metres
 
@@ -731,12 +734,13 @@ measurement unit, a call to this method will revert back to the default.
 
 Puts C<gpsd> in listening mode, ready to poll data from.
 
-We call this method internally when the object is instantiated with L</new(%args)> if
-we're not in file mode. Likewise, when the object is destroyed (end of program
-run), we call the subsequent L</off> method.
+We call this method internally when the object is instantiated with
+L<new()|/new(%args)> if we're not in file mode. Likewise, when the object is
+destroyed (end of program run), we call the subsequent L<off()|/off> method.
 
 If you have long periods of a program run where you don't need the GPS, you can
-manually run the L</off> and L</on> methods to disable and re-enable the GPS.
+manually run the L<off()|/off> and L<on()|/on> methods to disable and re-enable
+the GPS.
 
 =head2 off
 
@@ -744,16 +748,16 @@ Turns off C<gpsd> listening mode.
 
 Not necessary to call, but it will help preserve battery life if running on a
 portable device for long program runs where the GPS is used infrequently. Use in
-conjunction with L</on>. We call L</off> automatically when the object goes
-out of scope (program end for example).
+conjunction with L<on()|/on>. We call L<off()|/off> automatically when the
+object goes out of scope (program end for example).
 
 =head1 EXAMPLES
 
 =head2 Basic Features and Options
 
 Here's a simple example using some of the basic features and options. Please
-read through the documentation of the methods (particularly L</new(%args)> and
-L</tpv($stat)> to get a good grasp on what can be fetched).
+read through the documentation of the methods (particularly L<new()|/new(%args)>
+and L<tpv()|/tpv($stat)> to get a good grasp on what can be fetched).
 
     use warnings;
     use strict;
