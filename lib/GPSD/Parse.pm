@@ -889,6 +889,9 @@ unit to initialize itself and then lock on the satellites before we can get
 readings. For this reason, please understand that one test sweep may pass while
 the next fails.
 
+NOTE: Some GPS receivers can take up to 20 minutes before it acquires a peroper
+lock.
+
 I am considering adding specific checks, but considering that it's a timing
 thing (seconds, not microseconds that everyone is in a hurry for nowadays) I am
 going to wait until I get a chance to take the kit into the field before I do
