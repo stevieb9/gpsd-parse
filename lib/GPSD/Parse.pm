@@ -658,7 +658,7 @@ Parameters:
 
     $degree
 
-Mandatory, Ineger/Decimal: A decimal ranging from 0-360. Returns the direction
+Mandatory, Integer/Decimal: A decimal ranging from 0-360. Returns the direction
 representing the degree from true north. A common example would be:
 
     my $heading = $gps->direction($gps->track);
