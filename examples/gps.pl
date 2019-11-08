@@ -2,28 +2,20 @@ use warnings;
 use strict;
 use feature 'say';
 
-use Data::Dumper;
 use GPSD::Parse;
-
 my $gps = GPSD::Parse->new;
-
-my $raw;
-
+ 
 while (1){
-    $raw = $gps->poll;
-    print "$raw->{tpv}\n";
-    #last if $raw->{tpv};
-    sleep 5;
+    sleep 1;
+    next if ! defined $gps->poll;
+    say $gps->time . "\n";
+    
+    say "\tlat: " . $gps->lat;
+    say "\tlon: " . $gps->lon;
+    say "\tdeg: " . $gps->track;
+    say "\tdir: " . $gps->direction($gps->track);    
+    say "\tspd: " . $gps->speed;
+    say "\talt: " . $gps->alt;
+    say "\n";
+
 }
-
-# print Dumper $gps->satellites;
-# print Dumper $gps->sky;
-
-# my $sat = $gps->satellites(16);
-
-#say $gps->satellites(16, 'el');
-#say $gps->tpv('speed');
-#say $gps->time;
-#say $gps->device;
-
-print Dumper $raw;
