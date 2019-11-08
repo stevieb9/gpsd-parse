@@ -83,7 +83,9 @@ sub poll {
 
     my $gps_perl_data = decode_json $gps_json_data;
 
-    if (! defined $gps_perl_data->{tpv}[0]){
+    my $tpv = $gps_perl_data->{tpv}[0];
+
+    if (! defined $tpv || ! defined $tpv->{lat}){
         warn "\n\nWaiting for valid GPS signal...\n\n";
         return;
     }
@@ -509,7 +511,16 @@ C<'json'> and we'll return the data exactly as we received it from C<gpsd>.
 Returns:
 
 The raw poll data as either a Perl hash reference structure or as the
-original JSON string.
+original JSON string. If the GPS receiver has not yet locked in, the return
+will be C<undef>.
+
+NOTE: If polling within a loop, you can check the return value of C<poll()> to
+ensure there's valid data before proceeding. Eg:
+
+    while (1){
+        next if ! defined $gps->poll;
+        ...
+    }
 
 =head2 lon
 

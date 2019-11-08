@@ -12,8 +12,8 @@ my $raw;
 while (1){
     $raw = $gps->poll;
     print "$raw->{tpv}\n";
-    last if $raw->{tpv};
-    sleep 1;
+    #last if $raw->{tpv};
+    sleep 5;
 }
 
 # print Dumper $gps->satellites;
