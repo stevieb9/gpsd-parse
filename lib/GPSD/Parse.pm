@@ -86,7 +86,7 @@ sub poll {
     my $tpv = $gps_perl_data->{tpv}[0];
 
     if (! defined $tpv || ! defined $tpv->{lat}){
-        warn "\n\nWaiting for valid GPS signal...\n\n";
+        warn "Waiting for valid GPS signal...\n";
         return;
     }
 
